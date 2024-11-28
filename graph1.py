@@ -6,10 +6,11 @@ import numpy as np
 from collections import deque
 import time
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
+from PyQt6.QtCore import QTimer
 
 # Parameters
 N = 50  # Number of records to display
-update_interval = 0.1  # Time interval between updates (seconds)
+update_interval = 100  # Time interval between updates (milliseconds)
 
 # Initialize data storage
 data = deque([0] * N, maxlen=N)  # A fixed-length deque to store the last N records
@@ -43,46 +44,37 @@ layout.addWidget(start_button)
 layout.addWidget(stop_button)
 window.setLayout(layout)
 
-# Global flag to control the data generation
-running = True
+# Timer for updating the plot
+timer = QTimer()
+timer.setInterval(update_interval)
 
+def update_plot():
+    """Update the plot with new data."""
+    new_value = generate_data()
+    data.append(new_value)
+
+    # Update the line plot
+    line.set_ydata(data)
+    ax.set_ylim(min(data) - 0.1, max(data) + 0.1)  # Dynamic Y-axis scaling if needed
+    plt.draw()
+
+# Button actions
 def start_generation():
     """Start data generation."""
-    global running
-    running = True
+    timer.start()  # Start the timer for updates
     print("Data generation started.")
 
 def stop_generation():
     """Stop data generation."""
-    global running
-    running = False
+    timer.stop()  # Stop the timer for updates
     print("Data generation stopped.")
 
+# Connect buttons to their actions
 start_button.clicked.connect(start_generation)
 stop_button.clicked.connect(stop_generation)
 
-# Update the plot in real time
-def update_plot():
-    global running
-    while True:
-        if running:
-            # Generate and append new data
-            new_value = generate_data()
-            data.append(new_value)
-
-            # Update the line plot
-            line.set_ydata(data)
-            ax.set_ylim(min(data) - 0.1, max(data) + 0.1)  # Dynamic Y-axis scaling if needed
-            plt.draw()
-            plt.pause(update_interval)
-
-            # Handle PyQt6 events
-            app.processEvents()
-
-# Start the plot update in a separate thread
-import threading
-plot_thread = threading.Thread(target=update_plot, daemon=True)
-plot_thread.start()
+# Connect the timer to the update_plot function
+timer.timeout.connect(update_plot)
 
 # Show the window
 window.show()
