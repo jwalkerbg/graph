@@ -45,7 +45,7 @@ try:
         plt.pause(update_interval)
 
         # Handle PyQt6 events
-        app.processEvents(cc``)
+        app.processEvents()
 
 except KeyboardInterrupt:
     print("Real-time plotting stopped.")

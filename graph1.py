@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
 from PyQt6.QtCore import QTimer
 
 # Parameters
-N = 50  # Number of records to display
+N = 200  # Number of records to display
 update_interval = 100  # Time interval between updates (milliseconds)
 
 # Initialize data storage
@@ -25,9 +25,16 @@ ax.set_title("Real-Time Data Plot")
 ax.set_xlabel("Time (Relative Index)")
 ax.set_ylabel("Value")
 
+iteration = 0.0
+step = 0.09
+scale = 0.01
 def generate_data():
+    global iteration,scale, step
     """Simulate real-time data generation."""
-    return np.sin(time.time()) + np.random.normal(scale=0.1)
+
+    ret = np.sin(iteration) + np.random.normal(scale=scale)
+    iteration += step
+    return ret
 
 # PyQt6 application setup
 app = QApplication(sys.argv)
